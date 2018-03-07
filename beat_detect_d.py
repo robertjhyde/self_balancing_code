@@ -97,9 +97,9 @@ counter = 0
 def dance_move():
 	global counter
 	moves = [L,0,0,0,
-			 R,0,0,0,
-			 F,0,0,0,
-			 B,0,0,0]    # list of moves as defined by us
+		 R,0,0,0,
+		 F,0,0,0,
+		 B,0,0,0]    # list of moves as defined by us
 	move = moves[counter]    # choose the move for the corresponding beat
 	counter += 1    # cycles through the array
 	return move
@@ -122,14 +122,13 @@ while True:				# Main program loop
 		
 		if (pyb.millis()-tic > 400):	# if more than 400ms since last beat -
 			if (c>BEAT_THRESHOLD):		# look for a beat
-				move = dance_move()
+				move = dance_move()    # select move based on which one we found
 				if move == 0:
-					continue
+					continue    # if no move do nothing
 				else:
-					move()
+					move()    # this should run the function with the name of what we pulled?
 
-
-				#flash()					# beat found, flash blue LED
+				flash() 			# beat found, flash blue LED
 				tic = pyb.millis()		# reset tic
 		dac.write(0)					# sueful to see on scope, can remove
 		buffer_full = False				# reset status flag
