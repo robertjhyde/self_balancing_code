@@ -92,19 +92,24 @@ pyb.delay(100)
 tic = pyb.millis()			# mark time now in msec
 
 
+#    DANCE SECTION    #
+
 counter = 0
+move = 0
 
 def dance_move():
-	global counter
+	global counter, move
 	moves = [L,0,0,0,
 		 R,0,0,0,
 		 F,0,0,0,
 		 B,0,0,0]    # list of moves as defined by us
 	move = moves[counter]    # choose the move for the corresponding beat
 	counter += 1    # cycles through the array
-	return move
 
-
+	
+#    END OF DANCE SECTION    #
+	
+	
 while True:				# Main program loop
 	if buffer_full:		# semaphore signal from ISR - set if buffer is full
 		
@@ -123,9 +128,7 @@ while True:				# Main program loop
 		if (pyb.millis()-tic > 400):	# if more than 400ms since last beat -
 			if (c>BEAT_THRESHOLD):		# look for a beat
 				move = dance_move()    # select move based on which one we found
-				if move == 0:
-					continue    # if no move do nothing
-				else:
+				if move != 0:    # if not 0 then move
 					move()    # this should run the function with the name of what we pulled?
 
 				flash() 			# beat found, flash blue LED
