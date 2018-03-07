@@ -39,6 +39,7 @@ mic = ADC(Pin('Y11'))
 MIC_OFFSET = 1523		# ADC reading of microphone for silence
 dac = pyb.DAC(1, bits=12)  # Output voltage on X5 (BNC) for debugging
 b_LED = LED(4)		# flash for beats on blue LED
+r_LED = LED(3)          # flash when move on red LED
 
 N = 160				# size of sample buffer s_buf[]
 s_buf = array('H', 0 for i in range(N))  # reserve buffer memory
@@ -130,7 +131,9 @@ while True:				# Main program loop
 				move = dance_move()    # select move based on which one we found
 				if move != 0:    # if not 0 then move
 					move()    # this should run the function with the name of what we pulled?
-
+					r_LED.on()    # flash the red LED when move occurs
+					pyb.delay(20)
+					r_LED.off()
 				flash() 			# beat found, flash blue LED
 				tic = pyb.millis()		# reset tic
 		dac.write(0)					# sueful to see on scope, can remove
