@@ -128,7 +128,7 @@ while True:				# Main program loop
 		
 		if (pyb.millis()-tic > 400):	# if more than 400ms since last beat -
 			if (c>BEAT_THRESHOLD):		# look for a beat
-				move = dance_move()    # select move based on which one we found
+				dance_move()    # select move based on which one we found
 				if move != 0:    # if not 0 then move
 					move()    # this should run the function with the name of what we pulled?
 					r_LED.on()    # flash the red LED when move occurs
