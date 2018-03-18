@@ -70,7 +70,7 @@ def left_hop(value): #right wheel stays
 	A1.high()
 	A2.low()
 	motorA.pulse_width_percent(value)	
-	delay(1000)
+	
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
@@ -81,7 +81,7 @@ def right_hop(value):
 	B1.high()
 	B2.low()
 	motorB.pulse_width_percent(value)
-	delay(1000)
+	
 	B1.low()
 	B2.high()
 	motorB.pulse_width_percent(value)
@@ -93,28 +93,28 @@ def criss_cross(value): #right wheel goes forward and left goes back
 	A1.high()
 	A2.low()
 	motorA.pulse_width_percent(value)
-	delay(500)
+	
 	B1.high()
 	B2.low()
 	motorB.pulse_width_percent(value)
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
-	delay(500)
+	
 	B1.low()			
 	B2.high()			
 	morotB.pulse_width_percent(value)
 	A1.high()
 	A2.low()
 	motorA.pulse_width_percent(value)
-	delay(500)
+	
 	B1.high()
 	B2.low()
 	motorB.pulse_width_percent(value)
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
-	delay(500)
+	
 
 def chacha(value): #both wheel goes backward, but one wheel goes half speed of the other
 	B1.low()	   #repeat once with speed changed
@@ -123,12 +123,10 @@ def chacha(value): #both wheel goes backward, but one wheel goes half speed of t
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value/2)
-	pb.delay(10)
+	
 	B1.low()
 	B2.high()
 	motorB.pulse_width_percent(value/2)
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
-
-def 
