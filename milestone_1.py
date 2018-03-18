@@ -1,6 +1,12 @@
 import pyb
 from pyb import Pin, Timer, ADC, UART
+from oled_938 import OLED_938
 print('TEST: Run both wheels')
+
+# ----- OLED CONFIG ----- #
+old = OLED_938(pinout={'sda': 'Y10', 'scl': 'Y9', 'res': 'Y8'}, height = 64, external_vcc=False, i2c_devid=61)
+oled.poweron()
+oled.init_display()
 
 # ----- WHEEL DIRECTION ASSIGNMENT ----- #
 L1 = Pin('X7' ,Pin.OUT_PP)                           # Left FORWARD                   
@@ -35,6 +41,8 @@ DEADZONE = 5
 SLOW = 20
 HALF = 40
 MAX = 80
+
+oled.draw_text(0,20,'MILESTONE 1: Ready')         # Ready to begin commands
 
 while True:                                       # loop forever until CTRL-C
     while (uart.any()!=5):                        # Wait until we have 5 chars
