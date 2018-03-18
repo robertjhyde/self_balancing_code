@@ -22,6 +22,8 @@ motorB = tim.channel (2, Timer.PWM, pin = PWMB)
 # one hop = forward, back, stop, stop
 # two hop = forward, forward, back, back
 
+# for cha cha bit, choose a random selection of the chacha moves
+
 def forward(value):
 	A1.high()
 	A2.low()
