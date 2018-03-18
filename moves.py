@@ -2,30 +2,37 @@ from motor import MOTOR
 
 motor = MOTOR()
 
-def F():    # forward
+def F(speed):    # forward
   print('Move forward')
-  pass
+  motor.A_foward(speed)
+  motor.B_foward(speed)
   
-def FS():   # forward slow
+def FS(speed):   # forward slow
   print('Move forward slowly')
-  pass
+  motor.A_forward(speed/2)
+  motor.B_forward(speed/2)
 
-def B():    # backwards
+def B(speed):    # backwards
   print('Move backwards')
-  pass
+  motor.A_back(speed/2)
+  motor.B_back(speed/2)
 
-def R():    # right
+def R(speed):    # right
   print('Turn right')
-  pass
+  motor.A_forward(speed)
+  motor.B_forward(speed/4)
 
-def RS():   # right slow
+def RS(speed):   # right slow
   print('Turn right slowly')
-  pass
+  motor.A_forward(speed/2)
+  motor.A_backwards(speed/6)
 
-def L():    # left
+def L(speed):    # left
   print('Turn left')
-  pass
+  motor.A_forward(speed/4)
+  motor.B_forward(speed)
 
-def LS():   # left slow
+def LS(speed):   # left slow
   print('Turn left slowly')
-  pass
+  motor.A_forward(speed/6)
+  motor.B_forward(speed/2)
