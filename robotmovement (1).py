@@ -63,6 +63,7 @@ def back(value):
 	B1.low()
 	B2.high()
 	motorB.pulse_width_percent(value)
+	
 
 def left_hop(value): #right wheel stays 
 	B1.high()		 #left wheel goes front for 1 sec and comes back
@@ -70,7 +71,7 @@ def left_hop(value): #right wheel stays
 	A1.high()
 	A2.low()
 	motorA.pulse_width_percent(value)	
-	
+	# delay in here?
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
@@ -81,52 +82,57 @@ def right_hop(value):
 	B1.high()
 	B2.low()
 	motorB.pulse_width_percent(value)
-	
+	# delay in here?
 	B1.low()
 	B2.high()
 	motorB.pulse_width_percent(value)
+	
 
-def criss_cross(value): #right wheel goes forward and left goes back
-	B1.low()			#only for 0.5s and reverse
-	B2.high()			#repeat the process one more
+def criss_cross_1(value): #right wheel goes forward and left goes back
+	B1.low()
+	B2.high()
 	morotB.pulse_width_percent(value)
 	A1.high()
 	A2.low()
 	motorA.pulse_width_percent(value)
 	
+def cris_cross_2(value):
 	B1.high()
 	B2.low()
 	motorB.pulse_width_percent(value)
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
-	
-	B1.low()			
-	B2.high()			
-	morotB.pulse_width_percent(value)
-	A1.high()
-	A2.low()
-	motorA.pulse_width_percent(value)
-	
-	B1.high()
-	B2.low()
-	motorB.pulse_width_percent(value)
-	A1.low()
-	A2.high()
-	motorA.pulse_width_percent(value)
-	
+		
 
-def chacha(value): #both wheel goes backward, but one wheel goes half speed of the other
-	B1.low()	   #repeat once with speed changed
+def chacha_1(value): #both wheel goes backward, but one wheel goes half speed of the other
+	B1.low()
 	B2.high()
 	motorB.pulse_width_percent(value)
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value/2)
 	
+def chacha_2(value):
 	B1.low()
 	B2.high()
-	motorB.pulse_width_percent(value/2)
+	motorB.pulse_width_percent(value/3)
 	A1.low()
 	A2.high()
 	motorA.pulse_width_percent(value)
+	
+def chacha_3(value):
+	B1.high()
+	B2.low()
+	motorB.pulse_width_percent(value/2)
+	A1.high()
+	A2.low()
+	motorA.pulse_width_percent(value)
+
+def chacha_4(value):
+	B1.high()
+	B2.low()
+	motorB.pulse_width_percent(value)
+	A1.high()
+	A2.low()
+	motorA.pulse_width_percent(value/3)
