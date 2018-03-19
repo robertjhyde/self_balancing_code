@@ -64,19 +64,35 @@ pyb.enable_irq()			# enable interrupt again
 
 # ----- MAIN LOOP CONSTANTS ----- #
 M = 50					# number of instantaneous energy epochs to sum
-BEAT_THRESHOLD = 2.0			  # threshold for c to indicate a beat
+BEAT_THRESHOLD = 2.0			# threshold for c to indicate a beat
 SILENCE_THRESHOLD = 1.3			# threshold for c to indicate silence
-POS = 0                     # position in movelist (counter)
-MOVELIST = open(movelist.txt).read().splitlines
+POS = 0                     		# position in movelist (counter)
+MOVELIST = []				# empty list of moves to be added to
+MOVE = 'null'				# current move: to be updated
+MOVEFUNC = {				# corresponding function to move list value
+	'F': danceforward,
+	'FS': danceforwardslow,
+	'B': danceback,
+	'R': danceright,
+	'RS': dancerightslow,
+	'L': danceleft,
+	'LS': danceleftslow
+}
+
+# ----- IMPORT MOVES ----- #
+with open('movelist.txt') as file:	# select movelist text file
+	for line in file:		# move through list line by line
+		line = line.strip()	# remove formatting (i.e. \n)
+		MOVELIST.append(line)	# add move to movelist
 
 # initialise variables for main program loop 
 e_ptr = 0					# pointer to energy buffer
 e_buf = array('L', 0 for i in range(M)) 	# reserve storage for energy buffer
-sum_energy = 0				# total energy in last 50 epochs
+sum_energy = 0					# total energy in last 50 epochs
 oled.draw_text(5,20, 'MILESTONE 2: Ready')	# Useful to show what's happening?
 oled.display()
 pyb.delay(100)
-tic = pyb.millis()			# mark time now in msec
+tic = pyb.millis()				# mark time now in msec
 
 # ----- IDLE BEFORE RUNNING ----- #
 oled.draw_text(5, 20, 'MILESTONE 3: Ready')
@@ -92,23 +108,35 @@ while not trigger():
 print('Button pressed - running')
 
 # ----- MAIN PROGRAM LOOP ----- #
-while True:
-	if buffer_full:		# semaphore signal from ISR - set if buffer is full
+try:
+	while True:
+		if buffer_full:		# semaphore signal from ISR - set if buffer is full
 		
-		# Calculate instantaneous energy
-		E = energy(s_buf)
+			# Calculate instantaneous energy
+			E = energy(s_buf)
 		
-		# compute moving sum of last 50 energy epochs
-		sum_energy = sum_energy - e_buf[e_ptr] + E
-		e_buf[e_ptr] = E		# over-write earlest energy with most recent
-		e_ptr = (e_ptr + 1) % M		# increment e_ptr with wraparound - 0 to M-1
+			# compute moving sum of last 50 energy epochs
+			sum_energy = sum_energy - e_buf[e_ptr] + E
+			e_buf[e_ptr] = E		# over-write earlest energy with most recent
+			e_ptr = (e_ptr + 1) % M		# increment e_ptr with wraparound - 0 to M-1
 		
-		# Compute ratio of instantaneous energy/average energy
-		c = E*M/sum_energy
-		dac.write(min(int(c*4095/3), 4095)) 	# useful to see on scope, can remove
+			# Compute ratio of instantaneous energy/average energy
+			c = E*M/sum_energy
+			dac.write(min(int(c*4095/3), 4095)) 	# useful to see on scope, can remove
 		
-		if (pyb.millis()-tic > 400):		# if more than 400ms since last beat -
-			if (c>BEAT_THRESHOLD):		# look for a beat
-				flash()				          # beat found, flash blue LED
-				tic = pyb.millis()		  # reset tic
-		buffer_full = False				  # reset status flag
+			if (pyb.millis()-tic > 400):		# if more than 400ms since last beat -
+				if (c>BEAT_THRESHOLD):		# look for a beat
+					flash()				# beat found, flash blue LED
+					MOVE = MOVELIST[POS]		# take current move in file
+					if MOVE != 'w':			# 'w' is a 'wait' -> no function
+						M = MOVEFUNC[MOVE]	# find associated move function
+						print(M)		# debug
+						M()			# run associated move function
+					POS += 1			# next move	
+					tic = pyb.millis()		# reset tic
+			buffer_full = False				# reset status flag
+			
+finally:
+	motor.A_stop()
+	motor.B_stop()
+	print('Finished')
