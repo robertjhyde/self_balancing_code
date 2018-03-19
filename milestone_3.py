@@ -66,6 +66,7 @@ pyb.enable_irq()			# enable interrupt again
 M = 50					# number of instantaneous energy epochs to sum
 BEAT_THRESHOLD = 2.0			# threshold for c to indicate a beat
 SILENCE_THRESHOLD = 1.3			# threshold for c to indicate silence
+SPEED = 60				# baseline speed
 POS = 0                     		# position in movelist (counter)
 MOVELIST = []				# empty list of moves to be added to
 MOVE = 'null'				# current move: to be updated
