@@ -2,37 +2,37 @@ from motor import MOTOR
 
 motor = MOTOR()
 
-def F(speed):    # forward
+def danceforward(speed):    # forward
   print('Move forward')
-  motor.A_foward(speed)
-  motor.B_foward(speed)
+  motor.left_foward(speed)
+  motor.right_foward(speed)
   
-def FS(speed):   # forward slow
+def danceforwardslow(speed):   # forward slow
   print('Move forward slowly')
-  motor.A_forward(speed/2)
-  motor.B_forward(speed/2)
+  motor.left_forward(speed/2)
+  motor.right_forward(speed/2)
 
-def B(speed):    # backwards
+def danceback(speed):    # backwards
   print('Move backwards')
-  motor.A_back(speed/2)
-  motor.B_back(speed/2)
+  motor.left_back(speed/2)
+  motor.right_back(speed/2)
 
-def R(speed):    # right
+def danceright(speed):    # right
   print('Turn right')
-  motor.A_forward(speed)
-  motor.B_forward(speed/4)
+  motor.left_forward(speed)
+  motor.right_back(speed/4)
 
-def RS(speed):   # right slow
+def dancerightslow(speed):   # right slow
   print('Turn right slowly')
-  motor.A_forward(speed/2)
-  motor.A_backwards(speed/6)
+  motor.left_forward(speed/2)
+  motor.right_back(speed/6)
 
-def L(speed):    # left
+def danceleft(speed):    # left
   print('Turn left')
-  motor.A_forward(speed/4)
-  motor.B_forward(speed)
+  motor.left_back(speed/4)
+  motor.right_forward(speed)
 
-def LS(speed):   # left slow
+def danceleftslow(speed):   # left slow
   print('Turn left slowly')
-  motor.A_forward(speed/6)
-  motor.B_forward(speed/2)
+  motor.left_back(speed/6)
+  motor.right_forward(speed/2)
