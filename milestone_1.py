@@ -1,89 +1,84 @@
 import pyb
 from pyb import Pin, Timer, ADC, UART
 from oled_938 import OLED_938
-print('TEST: Run both wheels')
+
+print('MILESTONE 1')
 
 # ----- OLED CONFIG ----- #
-old = OLED_938(pinout={'sda': 'Y10', 'scl': 'Y9', 'res': 'Y8'}, height = 64, external_vcc=False, i2c_devid=61)
+oled = OLED_938(pinout={'sda': 'Y10', 'scl': 'Y9', 'res': 'Y8'}, height=64, external_vcc=False, i2c_devid=61)
 oled.poweron()
 oled.init_display()
 
-# ----- WHEEL DIRECTION ASSIGNMENT ----- #
-L1 = Pin('X7' ,Pin.OUT_PP)                           # Left FORWARD                   
-L2 = Pin('X8' ,Pin.OUT_PP)                          # Left REVERSE
-R1 = Pin('X3', Pin.OUT_PP)                           # Right FORWARD
-R2 = Pin('X4', Pin.OUT_PP)                           # Right REVERSE
+# ----- WHEEL ASSIGNMENT ----- #
+A1 = Pin('X3', Pin.OUT_PP)		    # Control direction of motor A
+A2 = Pin('X4', Pin.OUT_PP)
+PWMA = Pin('X1')				    # Control speed of motor A
+B2 = Pin('X7', Pin.OUT_PP)		    # Control direction of motor B
+B1 = Pin('X8', Pin.OUT_PP)
+PWMB = Pin('X2')				    # Control speed of motor B
 
-# ----- POTENTIOMETER AND PWM ----- #
-pot = ADC(Pin('X8'))                                 # I/O Pin for ADC
-PWMR = Pin('X1')                                     # PWM for right motor
-PWML = Pin('X2')                                     # PWM for left wheel
 
-# ----- TIMERS ----- #
-tim = Timer(2, freq = 1000)                          # Timer2 controls both PWM signals
-motorL = tim.channel(1, Timer.PWM, pin = PWML)       # PWM for left motor
-motorR = tim.channel(2, Timer.PWM, pin = PWMR)       # PWM for right motor
+# ----- TIMER ASSIGNMENT ----- #
+tim = Timer(2, freq = 1000)
+motorA = tim.channel (1, Timer.PWM, pin = PWMA)
+motorB = tim.channel (2, Timer.PWM, pin = PWMB)
 
 # ----- SPEED CONTROL WITH BLUETOOTH ----- #
 uart = UART(6)
-uart.init(9600, bits=8, parity = None, stop = 2)
+uart.init(9600, bits=8, parity=None, stop=2)
 
-ADCL = ADC(Pin('X2'))
-ADCR = ADC(Pin('X1'))
-                
-L1.high()                                          # Initial conditions - motors on break
-L2.high()
-R1.high()
-R2.high()
+A1.high(), A2.high()  # Initial conditions - motors on break
+B1.high(), B2.high()
 
-speed = 0
-DEADZONE = 5
-SLOW = 20
-HALF = 40
-MAX = 80
+speed = 0   # Speed variable to change
+SLOW = 30   # Reference speeds
+FAST = 60
 
-oled.draw_text(0,20,'MILESTONE 1: Ready')         # Ready to begin commands
+oled.draw_text(5, 20, 'MILESTONE 1: Ready') # Ready to begin commands
+oled.display()                              # OLED on
 
-while True:                                       # loop forever until CTRL-C
-    while (uart.any()!=5):                        # Wait until we have 5 chars
+while True:                                 # Infinite loop
+    while (uart.any() != 5):                # Wait for full command
         n = uart.any()
     command = uart.read(5)
-    motorL.pulse_width_percent(speed)
-    motorR.pulse_width_percent(speed)
+    # print(str(command))                   # Debugging
 
-# -- MOVEMENT -- #
-    if command[3] == ord('1'):
-        if command[2] == ord('5'):
+    # -- MOVEMENT -- #
+    motorA.pulse_width_percent(speed)
+    motorB.pulse_width_percent(speed)
+
+    if command[3] == ord('1'):      # On button press
+        if command[2] == ord('5'):  # Up arrow
             print('Forward')
-            L1.high()
-            L2.low()
-            R1.high()
-            R2.low()
-            speed = HALF
-        if command[2] == ord('6'):
+            A1.high()
+            A2.low()
+            B1.high()
+            B2.low()
+            speed = FAST
+        if command[2] == ord('6'):  # Down arrow
             print('Reverse')
-            L1.low()
-            L2.high()
-            R1.low()
-            R2.high()
+            A1.low()
+            A2.high()
+            B1.low()
+            B2.high()
             speed = SLOW
-        if command[2] == ord('7'):
+        if command[2] == ord('7'):  # Left arrow
             print('Turn Left')
-            L1.high()
-            L2.low()
-            R1.low()
-            R2.high()
-            speed = HALF
-        if command[2] == ord('8'):
+            A1.low()
+            A2.high()
+            B1.high()
+            B2.low()
+            speed = SLOW
+        if command[2] == ord('8'):  # Right arrow
             print('Turn Right')
-            L1.low()
-            L2.high()
-            R1.low()
-            R2.high()
-            speed = HALF
-    if command[3] == ord('0') and command[2]==ord('5') or command[2]==ord('6') or command[2]==ord('7') or command[2]==ord('8'):
+            A1.high()
+            A2.low()
+            B1.low()
+            B2.high()
+            speed = SLOW
+    if command[3] == ord('0'):      # On button release
         print('Stopped')
-        L1.low()
-        L2.low()
-        R1.low()
-        R2.low()
+        A1.low()
+        A2.low()
+        B1.low()
+        B2.low()
