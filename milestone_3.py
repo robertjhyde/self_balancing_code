@@ -145,12 +145,12 @@ try:
 				if (c>BEAT_THRESHOLD):		        # look for a beat
 					flash()				        # beat found, flash blue LED
 					MOVE = MOVELIST[POS]		# take current move in file
+                    POS += 1			    # ready for next move
 					if MOVE != 'w':			# 'w' is a 'wait' -> no function
 						M = MOVEFUNC[MOVE]	# find associated move function
                         M()                 # executes associated move function
-					POS += 1			    # next move
 					tic = pyb.millis()		# reset tic
-			buffer_full = False				# reset status flag
+            buffer_full = False				# reset status flag
 finally:
     A1.low()
     A2.low()
