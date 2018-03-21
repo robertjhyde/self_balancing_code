@@ -1,102 +1,146 @@
 import pyb, time
-from pyb import LED, DAC, ADC, Pin
+from pyb import LED, DAC, ADC, Pin, Timer, UART
 from oled_938 import OLED_938
 from mpu6050 import MPU6050
-from motor import MOTOR
 
-# Define various ports, pins and peripherals
-a_out = DAC(1, bits=12)
+# ----- POTENTIOMETER + USER BUTTON ASSIGNMENT ----- #
 pot = ADC(Pin('X11'))
-b_LED = LED(4)
+usr = pyb.Switch()
 
-# IMU connected to X9 and X10
+# ----- IMU ASSIGNMENT (to X9 and X10) ----- #
 imu = MPU6050(1, False)
 
-# Use OLED to say what it is doing
+# ----- WHEEL ASSIGNMENT ----- #
+A1 = Pin('X3', Pin.OUT_PP)		    # Control direction of motor A
+A2 = Pin('X4', Pin.OUT_PP)
+PWMA = Pin('X1')				    # Control speed of motor A
+B2 = Pin('X7', Pin.OUT_PP)		    # Control direction of motor B
+B1 = Pin('X8', Pin.OUT_PP)
+PWMB = Pin('X2')				    # Control speed of motor B
+
+# ----- TIMER ASSIGNMENT ----- #
+tim = Timer(2, freq = 1000)
+motorA = tim.channel (1, Timer.PWM, pin = PWMA)
+motorB = tim.channel (2, Timer.PWM, pin = PWMB)
+
+# ----- SPEED CONTROL WITH BLUETOOTH ----- #
+uart = UART(6)
+uart.init(9600, bits=8, parity=None, stop=2)
+
+# ----- OLED ASSIGNMENT ----- #
 oled = OLED_938(pinout={'sda': 'Y10', 'scl': 'Y9', 'res': 'Y8'}, height=64, external_vcc=False, i2c_devid=61)
 oled.poweron()
 oled.init_display()
-oled.draw_text(0,10, 'BALANCE CALIBRATION')
-oled.draw_text(0,20, 'Press USR button')
+oled.draw_text(0,0, 'Self_balance_ting.py')
+oled.draw_text(0,10, 'Initialising...')
+oled.draw_text(0,20, 'Press USER button to continue')
 oled.display()
 
 
-print('Ready to calibrate')
-print('Waiting for button press.')
-sw = pyb.Switch()
+while not usr():
+    time.sleep(0.001)
+while usr(): pass
 
-while not sw(): # prevent program from running until user is ready and has chosen value on POT
+'''
+while not usr(): # prevent program from running until user is ready and has chosen value on POT
     time.sleep(0.001)
-    K_p = pot.read() * 8.0 / 4095 # use pot to set Kp
-    oled.draw_text(0, 30, 'Kp = {:5.2f}'.format(K_p)) # display live value on oled
+    kp = pot.read() * 8 / 4095 # use pot to set Kp = 5.41
+    oled.draw_text(0, 30, 'Kp = {:5.2f}'.format(kp)) # display live value on oled
     oled.display()
-while sw(): pass # wait for button release
-while not sw(): # prevent program from running until user is ready and has chosen value on POT
+while usr(): pass # wait for button release
+while not usr(): # prevent program from running until user is ready and has chosen value on POT
     time.sleep(0.001)
-    K_i = pot.read() * 2.0 / 4095 # use pot to set Ki
-    oled.draw_text(0, 40, 'Ki = {:5.2f}'.format(K_i)) # display live value on oled
+    ki = pot.read() / 4095 * 2 # use pot to set Ki = 0.22
+    oled.draw_text(0, 40, 'Ki = {:5.2f}'.format(ki)) # display live value on oled
     oled.display()
-while sw(): pass # wait for button release
-while not sw(): # prevent program from running until user is ready and has chosen value on POT
+while usr(): pass # wait for button release
+while not usr(): # prevent program from running until user is ready and has chosen value on POT
     time.sleep(0.001)
-    K_d = pot.read() * 2.0 / 4095 # use pot to set Kd
-    oled.draw_text(0, 50, 'Kd = {:5.2f}'.format(K_d)) # display live value on oled
+    kd = pot.read() / 4095 # use pot to set Kd = 0.33
+    oled.draw_text(0, 50, 'Kd = {:5.2f}'.format(kd)) # display live value on oled
     oled.display()
-while sw(): pass # wait for button release
+while usr(): pass # wait for button release
+'''
 
-print('Button pressed. Running script.')
-oled.draw_text(0, 20, 'Button pressed. Running.')
+kp = 4.85
+ki = 0.30
+kd = 0.37
+
+oled.clear()
+oled.draw_text(0,20, 'Variables chosen')
 oled.display()
 
-# initial values
-theta_0 = 0
-target = theta_0
-c_error = 0
 
-# Pitch angle calculation using complementary filter
-def pitch_estimate(pitch, dt, alpha):
+def pitch_angle(pitch, dt, alpha):
     theta = imu.pitch()
     pitch_dot = imu.get_gy()
     pitch = alpha*(pitch + pitch_dot*dt) + (1-alpha)*theta
     return (pitch, pitch_dot)
 
-def
+
+def pid_controller(pit, pit_dot, target):
+    global kp, ki, kd, pit_error
+    error = pit - target
+    w = (kp*error) + (kd*pit_dot) + (ki*pit_error)
+    pit_error += error
+    if w >= 100:  # limiting w to +-100
+        w = 100
+    elif w <= -100:
+        w = -100
+    return w
+
+
+oled.draw_text(10, 30, 'Kp = {:5.2f}'.format(kp))  # display live value on oled
+oled.draw_text(10, 40, 'Ki = {:5.2f}'.format(ki))  # display live value on oled
+oled.draw_text(10, 50, 'Kd = {:5.2f}'.format(kd))  # display live value on oled
+oled.display()
+
 
 '''
 Main program loop
 '''
-pitch = 0	# initialise pitch angle to 0 to start
-alpha = 0.95	# alpha value in complementary filter
 
-calibration = -1.2 # calibrate for centre of mass (negative: lean towards top of board)
-motor_offset = 5 # remove motor deadzone
+pitch = 0  # initial pitch angle
+alpha = 0.95  # filter alpha value
 
-motor = MOTOR() # init motor object
-pidc = PIDC(Kp=K_p, Kd=K_d, Ki=K_i, theta_0=calibration) # init PID controller object
-pidc.target_reset() # set target point for self-balance as normal to ground
+motor_offset = 5  # remove motor deadzone for better control
+pitch_offset = -4.4  # to counter-act centre of mass, -ve = lean towards front of board
+pit_error = 0  # start with 0 cumulative error
 
 
 try:
     tic = pyb.micros()
     while True:
-        b_LED.toggle()
+
         dt = pyb.micros() - tic
-        if dt > 5000:		# sampling time is 5 msec or 50Hz
-            pitch, pitch_dot = pitch_estimate(pitch, dt*0.000001, alpha)
+        if dt > 5000:		# wait for sampling time
+            pitch, pitch_dot = pitch_angle(pitch, dt*0.000001, alpha)
             tic = pyb.micros()
+            pid = pid_controller(pitch, pitch_dot, pitch_offset)
 
-            u = pidc.get_pwm(pitch, pitch_dot)
+            #print(pid,pitch,pitch_dot)
 
-            if u > 0:
-                motor.A_forward(abs(u)+motor_offset)
-                motor.B_forward(abs(u)+motor_offset)
-            elif u < 0:
-                motor.A_back(abs(u)+motor_offset)
-                motor.B_back(abs(u)+motor_offset)
-            else:
-                motor.A_stop()
-                motor.B_stop()
+            # -- SPEED -- #
+            speed = (abs(pid) + motor_offset)
+            motorA.pulse_width_percent(speed)
+            motorB.pulse_width_percent(speed)
 
-finally: # in the event of a crash or keyboard interrupt turn of motors before exiting program
-    motor.A_stop()
-    motor.B_stop()
+            if pid < 0:  # go forwards
+                A1.high()
+                A2.low()
+                B1.high()
+                B2.low()
+            elif pid > 0:  # go backwards
+                A1.low()
+                A2.high()
+                B1.low()
+                B2.high()
+                #speed = (abs(pid)+motor_offset)
+            else:  # stay still
+                A1.high(), A2.high()
+                B1.high(), B2.high()
+
+
+finally:  # stop everything if it crashes
+    A1.high(), A2.high()
+    B1.high(), B2.high()
