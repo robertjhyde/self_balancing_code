@@ -1,81 +1,50 @@
-import pyb
-from pyb import Pin, Timer, ADC, UART
+from motor import MOTOR
+
+motor = MOTOR()
+
+def forward(speed):  # forwards
+    print('forward')
+    motor.B_back(speed)
+    motor.A_back(speed)
 
 
-# ----- WHEEL ASSIGNMENT ----- #
-A1 = Pin('X3', Pin.OUT_PP)		    # Control direction of motor A
-A2 = Pin('X4', Pin.OUT_PP)
-PWMA = Pin('X1')				    # Control speed of motor A
-B2 = Pin('X7', Pin.OUT_PP)		    # Control direction of motor B
-B1 = Pin('X8', Pin.OUT_PP)
-PWMB = Pin('X2')				    # Control speed of motor B
+def forwardslow(speed):  # slow forwards
+    print('forward slowly')
+    motor.B_back(2*speed/3)
+    motor.A_back(2*speed/3)
 
 
-# ----- TIMER ASSIGNMENT ----- #
-tim = Timer(2, freq = 1000)
-motorA = tim.channel (1, Timer.PWM, pin = PWMA)
-motorB = tim.channel (2, Timer.PWM, pin = PWMB)
+def back(speed):  # backwards
+    print('back')
+    motor.A_forward(2*speed/3)
+    motor.B_forward(2*speed/3)
 
 
-def danceforward(speed):    # forward
-    print('Move forward')
-    A1.high()
-    A2.low()
-    B1.high()
-    B2.low()
-    motorA.pulse_width_percent(speed)
-    motorB.pulse_width_percent(speed)
+def left(speed):  # left
+    print('left')
+    motor.B_back(speed)
+    motor.A_forward(speed / 4)
 
-def danceforwardslow(speed):   # forward slow
-    print('Move forward slowly')
-    A1.high()
-    A2.low()
-    B1.high()
-    B2.low()
-    motorA.pulse_width_percent(speed/2)
-    motorB.pulse_width_percent(speed/2)
 
-def danceback(speed):    # backwards
-    print('Move backwards')
-    A1.low()
-    A2.high()
-    B1.low()
-    B2.high()
-    motorA.pulse_width_percent(speed/2)
-    motorB.pulse_width_percent(speed/2)
+def leftslow(speed):  # slow left
+    print('left slowly')
+    motor.B_back(2 * speed / 3)
+    motor.A_forward(speed / 3)
 
-def danceright(speed):    # right
-    print('Turn right')
-    A1.high()
-    A2.low()
-    B1.low()
-    B2.high()
-    motorA.pulse_width_percent(speed)
-    motorB.pulse_width_percent(speed/4)
 
-def dancerightslow(speed):   # right slow
-    print('Turn right slowly')
-    A1.high()
-    A2.low()
-    B1.low()
-    B2.high()
-    motorA.pulse_width_percent(speed/2)
-    motorB.pulse_width_percent(speed/6)
+def right(speed):  # right
+    print('right')
+    motor.B_forward(speed / 4)
+    motor.A_back(speed)
 
-def danceleft(speed):    # left
-    print('Turn left')
-    A1.low()
-    A2.high()
-    B1.high()
-    B2.low()
-    motorA.pulse_width_percent(speed/4)
-    motorB.pulse_width_percent(speed)
 
-def danceleftslow(speed):   # left slow
-    print('Turn left slowly')
-    A1.low()
-    A2.high()
-    B1.high()
-    B2.low()
-    motorA.pulse_width_percent(speed/6)
-    motorB.pulse_width_percent(speed/2)
+def rightslow(speed):  # slow right
+    print('right slowly')
+    motor.B_forward(speed / 3)
+    motor.A_back(2 * speed / 3)
+
+
+def stop(speed):  # stop
+    print('stop')
+    motor.A_stop()
+    motor.B_stop()
