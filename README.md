@@ -1,2 +1,2 @@
 # self_balancing_code
-mmm
+For use in 'Balancing Segway' project.
